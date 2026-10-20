@@ -14,7 +14,7 @@ import {
   exportAllData,
   importData,
 } from '@/lib/storage';
-import {setSoundEnabled, isSoundEnabled, playPenClick} from '@/lib/audio';
+import {setSoundEnabled, playPenClick} from '@/lib/audio';
 import Cricket from '@/components/Cricket';
 import ChorPolice from '@/components/ChorPolice';
 import Dots from '@/components/Dots';
@@ -82,7 +82,7 @@ export default function Home() {
   };
 
   const handleClearHistory = async () => {
-    if (window.confirm(lang === 'bn' ? 'সব খেলার ইতিহাস মুছে ফেলতে চান?' : 'Clear all match history?')) {
+    if (window.confirm(lang === 'bn' ? 'খেলার ইতিহাস মুছতে চান?' : 'Clear match history?')) {
       await clearMatches();
       setHistory([]);
     }
@@ -109,14 +109,14 @@ export default function Home() {
       const content = event.target?.result as string;
       const success = await importData(content);
       if (success) {
-        setImportStatus(lang === 'bn' ? '✅ ইতিহাস সফলভাবে ইমপোর্ট হয়েছে!' : '✅ Data imported successfully!');
+        setImportStatus(lang === 'bn' ? 'ইতিহাস সফলভাবে ইমপোর্ট হয়েছে' : 'Data imported successfully');
         const updated = await listMatches();
         setHistory(updated);
         setHouseRulesState(getHouseRules());
       } else {
-        setImportStatus(lang === 'bn' ? '❌ ফাইল ত্রুটিপূর্ণ' : '❌ Failed to parse JSON file');
+        setImportStatus(lang === 'bn' ? 'ফাইল পড়া যায়নি' : 'Invalid JSON file');
       }
-      setTimeout(() => setImportStatus(''), 4000);
+      setTimeout(() => setImportStatus(''), 3000);
     };
     reader.readAsText(file);
   };
@@ -142,36 +142,33 @@ export default function Home() {
   if (game === 'dots') return <Dots {...gameProps} />;
 
   return (
-    <div className="mx-auto max-w-xl space-y-5 pb-8">
-      {/* App Header & Controls */}
-      <header className="flex items-center justify-between border-b border-stone-300/80 pb-3">
+    <div className="mx-auto max-w-lg space-y-4 pb-8">
+      {/* Clean Minimal Header */}
+      <header className="flex items-center justify-between border-b border-stone-200 pb-3">
         <div>
-          <div className="flex items-center gap-2">
-            <span className="text-2xl">📓</span>
-            <h1 className="text-2xl font-black tracking-tight text-emerald-950 sm:text-3xl">
-              {T('appTitle')}
-            </h1>
-          </div>
-          <p className="text-xs text-stone-600 sm:text-sm">{T('tagline')}</p>
+          <h1 className="text-xl font-bold tracking-tight text-stone-900 sm:text-2xl">
+            {T('appTitle')}
+          </h1>
+          <p className="text-xs text-stone-500">{T('tagline')}</p>
         </div>
 
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-2">
           {/* Sound Toggle */}
           <button
             onClick={toggleSound}
-            className="flex h-9 w-9 items-center justify-center rounded-xl border border-stone-300 bg-white shadow-sm hover:bg-stone-100 active:scale-95"
+            className="flex h-9 w-9 items-center justify-center rounded-lg border border-stone-200 bg-white text-sm text-stone-700 transition hover:bg-stone-50 active:scale-95"
             title={sound ? T('soundOn') : T('soundOff')}
           >
             {sound ? '🔊' : '🔇'}
           </button>
 
-          {/* Settings & House Rules */}
+          {/* Settings Toggle */}
           <button
             onClick={() => {
               playPenClick();
               setShowSettings(true);
             }}
-            className="flex h-9 w-9 items-center justify-center rounded-xl border border-stone-300 bg-white shadow-sm hover:bg-stone-100 active:scale-95"
+            className="flex h-9 w-9 items-center justify-center rounded-lg border border-stone-200 bg-white text-sm text-stone-700 transition hover:bg-stone-50 active:scale-95"
             title={T('rulesSettings')}
           >
             ⚙️
@@ -180,32 +177,29 @@ export default function Home() {
           {/* Language Toggle */}
           <button
             onClick={toggleLang}
-            className="rounded-xl border border-emerald-800 bg-emerald-800 px-3 py-1.5 text-xs font-bold text-white shadow-sm hover:bg-emerald-900 active:scale-95"
+            className="rounded-lg border border-stone-300 bg-white px-3 py-1.5 text-xs font-semibold text-stone-800 transition hover:bg-stone-50 active:scale-95"
           >
             {lang === 'en' ? 'বাংলা' : 'English'}
           </button>
         </div>
       </header>
 
-      {/* Mode & Difficulty Selector Card */}
-      <section className="notebook-card p-4 space-y-3">
-        {/* Game Mode Selector */}
+      {/* Mode & Difficulty Selector */}
+      <section className="rounded-xl border border-stone-200 bg-white p-3 space-y-3 shadow-xs">
+        {/* Mode Selector */}
         <div>
-          <div className="mb-1.5 flex items-center justify-between text-xs font-bold uppercase tracking-wider text-stone-500">
-            <span>{T('mode')}</span>
-            <span className="text-[11px] font-normal text-stone-400">
-              {mode === 'computer' ? '🤖 Play vs AI' : mode === 'local' ? '👥 Pass device' : '🎯 Free play'}
-            </span>
+          <div className="mb-1.5 text-xs font-semibold text-stone-500 uppercase tracking-wider">
+            {T('mode')}
           </div>
-          <div className="grid grid-cols-3 gap-2">
+          <div className="grid grid-cols-3 gap-1.5 rounded-lg bg-stone-100 p-1">
             {(['computer', 'local', 'solo'] as Mode[]).map(m => (
               <button
                 key={m}
                 onClick={() => handleSelectMode(m)}
-                className={`rounded-xl py-2 px-1 text-center text-xs font-bold transition-all ${
+                className={`rounded-md py-1.5 text-center text-xs font-semibold transition ${
                   mode === m
-                    ? 'bg-emerald-700 text-white shadow-md ring-2 ring-emerald-600/50 scale-[1.02]'
-                    : 'border border-stone-200 bg-stone-50/80 text-stone-700 hover:bg-stone-100'
+                    ? 'bg-white text-stone-900 shadow-xs'
+                    : 'text-stone-600 hover:text-stone-900'
                 }`}
               >
                 {T(m)}
@@ -214,21 +208,21 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Difficulty Selector (Visible when mode is 'computer') */}
+        {/* Difficulty (Computer Mode only) */}
         {mode === 'computer' && (
           <div className="pt-2 border-t border-stone-100 animate-fade-in">
-            <div className="mb-1.5 text-xs font-bold uppercase tracking-wider text-stone-500">
+            <div className="mb-1.5 text-xs font-semibold text-stone-500 uppercase tracking-wider">
               {T('difficulty')}
             </div>
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-3 gap-1.5 rounded-lg bg-stone-100 p-1">
               {(['easy', 'medium', 'hard'] as Diff[]).map(d => (
                 <button
                   key={d}
                   onClick={() => handleSelectDiff(d)}
-                  className={`rounded-xl py-1.5 text-center text-xs font-bold transition-all ${
+                  className={`rounded-md py-1.5 text-center text-xs font-semibold transition ${
                     diff === d
-                      ? 'bg-amber-600 text-white shadow-md ring-2 ring-amber-500/50'
-                      : 'border border-stone-200 bg-stone-50/80 text-stone-700 hover:bg-stone-100'
+                      ? 'bg-white text-stone-900 shadow-xs'
+                      : 'text-stone-600 hover:text-stone-900'
                   }`}
                 >
                   {T(d)}
@@ -239,48 +233,32 @@ export default function Home() {
         )}
       </section>
 
-      {/* THREE MAIN GAME CARDS */}
-      <section className="space-y-3">
+      {/* Clean Game Cards */}
+      <section className="space-y-2.5">
         {/* 1. Paper Cricket */}
         <div
           onClick={() => {
             playPenClick();
             setGame('cricket');
           }}
-          className="group relative cursor-pointer overflow-hidden rounded-3xl border-2 border-emerald-900/15 bg-white p-5 shadow-md transition-all hover:-translate-y-1 hover:border-emerald-700 hover:shadow-xl active:scale-[0.99]"
+          className="group cursor-pointer rounded-xl border border-stone-200 bg-white p-4 transition-all hover:border-emerald-600 hover:shadow-sm active:scale-[0.99]"
         >
-          {/* Top Ruled Paper Accent */}
-          <div className="pointer-events-none absolute top-0 left-0 right-0 h-1.5 bg-emerald-600" />
-
-          <div className="flex items-start justify-between">
-            <div className="space-y-1">
-              <div className="flex items-center gap-2">
-                <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-emerald-100 text-2xl shadow-sm">
-                  🏏
-                </span>
-                <div>
-                  <h3 className="text-xl font-black text-stone-900 group-hover:text-emerald-800 transition-colors">
-                    {T('cricket')}
-                  </h3>
-                  <div className="text-xs font-medium text-emerald-700">{T('cricketSub')}</div>
-                </div>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-stone-100 text-xl text-stone-700">
+                🏏
+              </span>
+              <div>
+                <h3 className="text-base font-bold text-stone-900 group-hover:text-emerald-700 transition">
+                  {T('cricket')}
+                </h3>
+                <p className="text-xs text-stone-500">{T('cricketSub')}</p>
               </div>
-              <p className="mt-2 text-xs text-stone-600 leading-relaxed">
-                {lang === 'bn'
-                  ? 'খাতার পাতায় আঁকা ঘড়ির ডায়ালে ১২ টায় ৬ এবং ৩ ও ৯ টায় ৪! আসল কলম ঘুরিয়ে রান ও উইকেটের রোমাঞ্চ।'
-                  : 'Flick an authentic ballpoint pen inside a 12-hour clock dial with 6s and 4s! Bowl deliveries, chase targets, and win.'}
-              </p>
             </div>
 
-            <span className="rounded-xl border border-emerald-300 bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-800 shadow-sm">
-              Play →
+            <span className="rounded-lg bg-stone-100 px-3 py-1.5 text-xs font-semibold text-stone-700 group-hover:bg-emerald-50 group-hover:text-emerald-800 transition">
+              {lang === 'bn' ? 'খেলুন →' : 'Play →'}
             </span>
-          </div>
-
-          <div className="mt-3 flex flex-wrap gap-2 text-[11px] font-semibold text-stone-500">
-            <span className="rounded-md bg-stone-100 px-2 py-0.5">⏱️ 12-Hour Dial</span>
-            <span className="rounded-md bg-amber-100 text-amber-900 px-2 py-0.5">🌟 6s & 4s Clock</span>
-            <span className="rounded-md bg-stone-100 px-2 py-0.5">🖊️ Real Pen Physics</span>
           </div>
         </div>
 
@@ -290,40 +268,24 @@ export default function Home() {
             playPenClick();
             setGame('chor');
           }}
-          className="group relative cursor-pointer overflow-hidden rounded-3xl border-2 border-amber-900/15 bg-white p-5 shadow-md transition-all hover:-translate-y-1 hover:border-amber-600 hover:shadow-xl active:scale-[0.99]"
+          className="group cursor-pointer rounded-xl border border-stone-200 bg-white p-4 transition-all hover:border-emerald-600 hover:shadow-sm active:scale-[0.99]"
         >
-          <div className="pointer-events-none absolute top-0 left-0 right-0 h-1.5 bg-amber-500" />
-
-          <div className="flex items-start justify-between">
-            <div className="space-y-1">
-              <div className="flex items-center gap-2">
-                <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-amber-100 text-2xl shadow-sm">
-                  ✉️
-                </span>
-                <div>
-                  <h3 className="text-xl font-black text-stone-900 group-hover:text-amber-800 transition-colors">
-                    {T('chor')}
-                  </h3>
-                  <div className="text-xs font-medium text-amber-700">{T('chorSub')}</div>
-                </div>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-stone-100 text-xl text-stone-700">
+                ✉️
+              </span>
+              <div>
+                <h3 className="text-base font-bold text-stone-900 group-hover:text-emerald-700 transition">
+                  {T('chor')}
+                </h3>
+                <p className="text-xs text-stone-500">{T('chorSub')}</p>
               </div>
-              <p className="mt-2 text-xs text-stone-600 leading-relaxed">
-                {lang === 'bn'
-                  ? 'রাজা, মন্ত্রী, পুলিশ, চোর — চার চিরকুটের ক্লাসিক খেলা। পুলিশকে সঠিক চোর খুঁজে বের করতে হবে!'
-                  : 'Raja (1000), Mantri (800), Police (500), Chor (0)! Secret folded paper slips, court dialogues, and undercover guesses.'}
-              </p>
             </div>
 
-            <span className="rounded-xl border border-amber-300 bg-amber-50 px-3 py-1 text-xs font-bold text-amber-800 shadow-sm">
-              Play →
+            <span className="rounded-lg bg-stone-100 px-3 py-1.5 text-xs font-semibold text-stone-700 group-hover:bg-emerald-50 group-hover:text-emerald-800 transition">
+              {lang === 'bn' ? 'খেলুন →' : 'Play →'}
             </span>
-          </div>
-
-          <div className="mt-3 flex flex-wrap gap-2 text-[11px] font-semibold text-stone-500">
-            <span className="rounded-md bg-stone-100 px-2 py-0.5">👑 Raja (1000)</span>
-            <span className="rounded-md bg-stone-100 px-2 py-0.5">📜 Mantri (800)</span>
-            <span className="rounded-md bg-stone-100 px-2 py-0.5">👮 Police (500)</span>
-            <span className="rounded-md bg-stone-100 px-2 py-0.5">🎭 Chor</span>
           </div>
         </div>
 
@@ -333,54 +295,38 @@ export default function Home() {
             playPenClick();
             setGame('dots');
           }}
-          className="group relative cursor-pointer overflow-hidden rounded-3xl border-2 border-blue-900/15 bg-white p-5 shadow-md transition-all hover:-translate-y-1 hover:border-blue-600 hover:shadow-xl active:scale-[0.99]"
+          className="group cursor-pointer rounded-xl border border-stone-200 bg-white p-4 transition-all hover:border-emerald-600 hover:shadow-sm active:scale-[0.99]"
         >
-          <div className="pointer-events-none absolute top-0 left-0 right-0 h-1.5 bg-blue-600" />
-
-          <div className="flex items-start justify-between">
-            <div className="space-y-1">
-              <div className="flex items-center gap-2">
-                <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-blue-100 text-2xl shadow-sm">
-                  ▦
-                </span>
-                <div>
-                  <h3 className="text-xl font-black text-stone-900 group-hover:text-blue-800 transition-colors">
-                    {T('dots')}
-                  </h3>
-                  <div className="text-xs font-medium text-blue-700">{T('dotsSub')}</div>
-                </div>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-stone-100 text-xl text-stone-700">
+                ▦
+              </span>
+              <div>
+                <h3 className="text-base font-bold text-stone-900 group-hover:text-emerald-700 transition">
+                  {T('dots')}
+                </h3>
+                <p className="text-xs text-stone-500">{T('dotsSub')}</p>
               </div>
-              <p className="mt-2 text-xs text-stone-600 leading-relaxed">
-                {lang === 'bn'
-                  ? 'খাতার পাতায় ডটস অ্যান্ড বক্সেস। দাগ টেনে ঘর পূরণ করুন, বোনাস চাল নিন এবং প্রতিপক্ষকে হারান।'
-                  : 'The nostalgic grid game on ruled paper! Blue and red pen lines, box completion stamps, and extra turn combos.'}
-              </p>
             </div>
 
-            <span className="rounded-xl border border-blue-300 bg-blue-50 px-3 py-1 text-xs font-bold text-blue-800 shadow-sm">
-              Play →
+            <span className="rounded-lg bg-stone-100 px-3 py-1.5 text-xs font-semibold text-stone-700 group-hover:bg-emerald-50 group-hover:text-emerald-800 transition">
+              {lang === 'bn' ? 'খেলুন →' : 'Play →'}
             </span>
-          </div>
-
-          <div className="mt-3 flex flex-wrap gap-2 text-[11px] font-semibold text-stone-500">
-            <span className="rounded-md bg-stone-100 px-2 py-0.5">🖊️ Blue vs Red Pen</span>
-            <span className="rounded-md bg-stone-100 px-2 py-0.5">⚡ Extra Turn Combos</span>
-            <span className="rounded-md bg-stone-100 px-2 py-0.5">🧠 3 AI Difficulties</span>
           </div>
         </div>
       </section>
 
       {/* Match History */}
-      <section className="notebook-card p-4 space-y-3">
-        <div className="flex items-center justify-between border-b border-stone-200/80 pb-2">
-          <div className="flex items-center gap-2 font-bold text-stone-800 text-sm">
-            <span>📜</span>
-            <span>{T('history')}</span>
-          </div>
+      <section className="rounded-xl border border-stone-200 bg-white p-3.5 space-y-2.5 shadow-xs">
+        <div className="flex items-center justify-between border-b border-stone-100 pb-2">
+          <span className="text-xs font-semibold text-stone-600 uppercase tracking-wider">
+            {T('history')}
+          </span>
           {history.length > 0 && (
             <button
               onClick={handleClearHistory}
-              className="text-xs font-medium text-red-600 hover:underline"
+              className="text-[11px] text-stone-400 hover:text-stone-700"
             >
               {T('clearHistory')}
             </button>
@@ -388,29 +334,29 @@ export default function Home() {
         </div>
 
         {history.length === 0 ? (
-          <p className="text-xs text-stone-500 italic py-2 text-center">{T('none')}</p>
+          <p className="text-xs text-stone-400 py-1">{T('none')}</p>
         ) : (
-          <div className="space-y-2">
+          <div className="space-y-1.5">
             {history.map(item => (
               <div
                 key={item.id}
-                className="flex items-center justify-between rounded-xl border border-stone-200/80 bg-stone-50/60 p-2.5 text-xs transition-all hover:bg-stone-50"
+                className="flex items-center justify-between rounded-lg bg-stone-50 px-3 py-2 text-xs"
               >
                 <div>
-                  <div className="font-bold text-stone-800">
+                  <div className="font-semibold text-stone-800">
                     {item.game === 'cricket'
-                      ? `🏏 ${T('cricket')}`
+                      ? T('cricket')
                       : item.game === 'chor'
-                      ? `✉️ ${T('chor')}`
-                      : `▦ ${T('dots')}`}
+                      ? T('chor')
+                      : T('dots')}
                   </div>
-                  <div className="text-[11px] text-stone-500">
+                  <div className="text-[10px] text-stone-500">
                     {item.date ? new Date(item.date).toLocaleDateString() : ''} • {T(item.mode)}
                   </div>
                 </div>
 
                 <div className="text-right">
-                  <div className="font-mono font-bold text-emerald-800">{item.result}</div>
+                  <div className="font-mono font-bold text-stone-900">{item.result}</div>
                   {item.details && <div className="text-[10px] text-stone-500">{item.details}</div>}
                 </div>
               </div>
@@ -419,53 +365,41 @@ export default function Home() {
         )}
       </section>
 
-      {/* Footer Info */}
-      <footer className="text-center text-xs text-stone-500 space-y-1">
-        <p>🔒 {T('offline')}</p>
-        <p className="text-[11px] text-stone-400">Bangladeshi Paper Games Collection • Local-Only v3.0</p>
+      {/* Clean Footer */}
+      <footer className="text-center text-xs text-stone-400 pt-2">
+        <p>{T('offline')}</p>
       </footer>
 
-      {/* SETTINGS & HOUSE RULES MODAL (FR-14 & FR-15) */}
+      {/* Clean Settings Modal */}
       {showSettings && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-xs animate-fade-in">
-          <div className="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-3xl border border-stone-300 bg-white p-6 shadow-2xl space-y-5">
-            <div className="flex items-center justify-between border-b border-stone-200 pb-3">
-              <h2 className="text-lg font-black text-stone-900 flex items-center gap-2">
-                <span>⚙️</span>
-                <span>{T('rulesSettings')}</span>
-              </h2>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-stone-900/40 p-4 animate-fade-in">
+          <div className="w-full max-w-sm rounded-2xl border border-stone-200 bg-white p-5 shadow-xl space-y-4">
+            <div className="flex items-center justify-between border-b border-stone-100 pb-2.5">
+              <h2 className="text-base font-bold text-stone-900">{T('rulesSettings')}</h2>
               <button
                 onClick={() => {
                   playPenClick();
                   setShowSettings(false);
                 }}
-                className="h-8 w-8 rounded-full border border-stone-200 text-sm font-bold text-stone-500 hover:bg-stone-100"
+                className="h-7 w-7 rounded-lg border border-stone-200 text-xs font-semibold text-stone-500 hover:bg-stone-50"
               >
                 ✕
               </button>
             </div>
 
-            {/* House Rules Configuration */}
-            <div className="space-y-4">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-emerald-800">
-                {T('houseRules')}
-              </h3>
-
-              {/* Cricket Overs / Balls */}
+            <div className="space-y-3 text-xs">
+              {/* Cricket balls */}
               <div className="flex items-center justify-between">
-                <div>
-                  <div className="text-xs font-bold text-stone-800">{T('oversLength')}</div>
-                  <div className="text-[11px] text-stone-500">Number of balls per innings</div>
-                </div>
+                <span className="font-medium text-stone-700">{T('oversLength')}</span>
                 <div className="flex gap-1">
                   {[6, 12, 18, 24].map(b => (
                     <button
                       key={b}
                       onClick={() => updateRule('cricketBalls', b)}
-                      className={`h-8 w-9 rounded-lg text-xs font-bold ${
+                      className={`h-7 w-8 rounded-md font-semibold transition ${
                         houseRules.cricketBalls === b
-                          ? 'bg-emerald-700 text-white'
-                          : 'border border-stone-200 bg-stone-50 text-stone-700'
+                          ? 'bg-stone-900 text-white'
+                          : 'border border-stone-200 text-stone-600 hover:bg-stone-50'
                       }`}
                     >
                       {b}
@@ -474,21 +408,18 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* Cricket Wickets Limit */}
+              {/* Cricket wickets */}
               <div className="flex items-center justify-between">
-                <div>
-                  <div className="text-xs font-bold text-stone-800">{T('wicketsLimit')}</div>
-                  <div className="text-[11px] text-stone-500">Wickets allowed per team</div>
-                </div>
+                <span className="font-medium text-stone-700">{T('wicketsLimit')}</span>
                 <div className="flex gap-1">
                   {[1, 2, 3, 5].map(w => (
                     <button
                       key={w}
                       onClick={() => updateRule('cricketWickets', w)}
-                      className={`h-8 w-9 rounded-lg text-xs font-bold ${
+                      className={`h-7 w-8 rounded-md font-semibold transition ${
                         houseRules.cricketWickets === w
-                          ? 'bg-emerald-700 text-white'
-                          : 'border border-stone-200 bg-stone-50 text-stone-700'
+                          ? 'bg-stone-900 text-white'
+                          : 'border border-stone-200 text-stone-600 hover:bg-stone-50'
                       }`}
                     >
                       {w}
@@ -497,21 +428,18 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* Chor Police Rounds */}
+              {/* Chor rounds */}
               <div className="flex items-center justify-between">
-                <div>
-                  <div className="text-xs font-bold text-stone-800">{T('chorRoundsCount')}</div>
-                  <div className="text-[11px] text-stone-500">Total rounds to play</div>
-                </div>
+                <span className="font-medium text-stone-700">{T('chorRoundsCount')}</span>
                 <div className="flex gap-1">
                   {[3, 5, 7, 10].map(r => (
                     <button
                       key={r}
                       onClick={() => updateRule('chorRounds', r)}
-                      className={`h-8 w-9 rounded-lg text-xs font-bold ${
+                      className={`h-7 w-8 rounded-md font-semibold transition ${
                         houseRules.chorRounds === r
-                          ? 'bg-amber-600 text-white'
-                          : 'border border-stone-200 bg-stone-50 text-stone-700'
+                          ? 'bg-stone-900 text-white'
+                          : 'border border-stone-200 text-stone-600 hover:bg-stone-50'
                       }`}
                     >
                       {r}
@@ -520,21 +448,18 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* Dots Grid Size */}
+              {/* Dots grid */}
               <div className="flex items-center justify-between">
-                <div>
-                  <div className="text-xs font-bold text-stone-800">{T('gridSize')}</div>
-                  <div className="text-[11px] text-stone-500">Boxes dimension</div>
-                </div>
+                <span className="font-medium text-stone-700">{T('gridSize')}</span>
                 <div className="flex gap-1">
                   {[3, 4, 5].map(s => (
                     <button
                       key={s}
                       onClick={() => updateRule('dotsSize', s)}
-                      className={`h-8 w-11 rounded-lg text-xs font-bold ${
+                      className={`h-7 w-10 rounded-md font-semibold transition ${
                         houseRules.dotsSize === s
-                          ? 'bg-blue-600 text-white'
-                          : 'border border-stone-200 bg-stone-50 text-stone-700'
+                          ? 'bg-stone-900 text-white'
+                          : 'border border-stone-200 text-stone-600 hover:bg-stone-50'
                       }`}
                     >
                       {s}x{s}
@@ -544,44 +469,37 @@ export default function Home() {
               </div>
             </div>
 
-            {/* JSON Data Export / Import (FR-15) */}
-            <div className="border-t border-stone-200 pt-4 space-y-3">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-emerald-800">
-                JSON Data Backup & Restore
-              </h3>
-
-              <div className="flex gap-2">
-                <button
-                  onClick={handleExportJSON}
-                  className="flex-1 rounded-xl border border-stone-300 bg-stone-50 py-2 text-xs font-bold text-stone-800 shadow-sm hover:bg-stone-100"
-                >
-                  📥 {T('exportData')}
-                </button>
-
-                <label className="flex-1 cursor-pointer rounded-xl border border-stone-300 bg-stone-50 py-2 text-center text-xs font-bold text-stone-800 shadow-sm hover:bg-stone-100">
-                  <span>📤 {T('importData')}</span>
-                  <input
-                    type="file"
-                    accept=".json"
-                    className="hidden"
-                    onChange={handleImportJSON}
-                  />
-                </label>
-              </div>
-
-              {importStatus && (
-                <div className="rounded-lg bg-emerald-50 p-2 text-center text-xs font-semibold text-emerald-800">
-                  {importStatus}
-                </div>
-              )}
+            {/* Export & Import */}
+            <div className="border-t border-stone-100 pt-3 flex gap-2">
+              <button
+                onClick={handleExportJSON}
+                className="flex-1 rounded-lg border border-stone-200 bg-stone-50 py-2 text-xs font-semibold text-stone-700 hover:bg-stone-100"
+              >
+                📥 {T('exportData')}
+              </button>
+              <label className="flex-1 cursor-pointer rounded-lg border border-stone-200 bg-stone-50 py-2 text-center text-xs font-semibold text-stone-700 hover:bg-stone-100">
+                <span>📤 {T('importData')}</span>
+                <input
+                  type="file"
+                  accept=".json"
+                  className="hidden"
+                  onChange={handleImportJSON}
+                />
+              </label>
             </div>
+
+            {importStatus && (
+              <div className="text-center text-xs text-stone-600 font-medium">
+                {importStatus}
+              </div>
+            )}
 
             <button
               onClick={() => {
                 playPenClick();
                 setShowSettings(false);
               }}
-              className="w-full rounded-2xl bg-emerald-700 py-3 font-bold text-white shadow-md hover:bg-emerald-800 active:scale-95"
+              className="w-full rounded-xl bg-stone-900 py-2.5 text-xs font-bold text-white transition hover:bg-stone-800 active:scale-95"
             >
               {T('close')}
             </button>

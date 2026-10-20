@@ -8,7 +8,7 @@ import {pickMove} from '@/lib/games/dots-and-boxes/computer';
 import {playLineDraw, playBoxComplete, playCricketBoundary} from '@/lib/audio';
 
 const SPACING = 68;
-const PADDING = 30;
+const PADDING = 28;
 
 export default function Dots({lang, mode, difficulty, houseRules, onExit, onDone}: GameProps) {
   const T = (k: string) => t(lang, k);
@@ -27,7 +27,6 @@ export default function Dots({lang, mode, difficulty, houseRules, onExit, onDone
 
   const isCpuTurn = mode === 'computer' && gameState.turn === 1 && !gameState.done;
 
-  // Handle line click
   const handleLineClick = (lineIndex: number) => {
     if (gameState.lines[lineIndex] || gameState.done || isCpuTurn) return;
 
@@ -46,7 +45,6 @@ export default function Dots({lang, mode, difficulty, houseRules, onExit, onDone
     setGameState(nextState);
   };
 
-  // AI Move calculation
   useEffect(() => {
     if (isCpuTurn && !gameState.done) {
       const timer = setTimeout(() => {
@@ -66,7 +64,6 @@ export default function Dots({lang, mode, difficulty, houseRules, onExit, onDone
     }
   }, [isCpuTurn, gameState, difficulty]);
 
-  // Save game on completion
   useEffect(() => {
     if (gameState.done && !saved.current) {
       saved.current = true;
@@ -100,7 +97,6 @@ export default function Dots({lang, mode, difficulty, houseRules, onExit, onDone
 
   const getLineCoords = (i: number): [number, number, number, number] => {
     if (i < H) {
-      // Horizontal line
       const r = Math.floor(i / gameState.C);
       const c = i % gameState.C;
       return [
@@ -110,7 +106,6 @@ export default function Dots({lang, mode, difficulty, houseRules, onExit, onDone
         PADDING + r * SPACING,
       ];
     }
-    // Vertical line
     const j = i - H;
     const r = Math.floor(j / (gameState.C + 1));
     const c = j % (gameState.C + 1);
@@ -125,112 +120,114 @@ export default function Dots({lang, mode, difficulty, houseRules, onExit, onDone
   const winnerText =
     gameState.scores[0] === gameState.scores[1]
       ? T('tie')
-      : `🏆 ${names[gameState.scores[0] > gameState.scores[1] ? 0 : 1]} ${T('wins')}`;
+      : `${names[gameState.scores[0] > gameState.scores[1] ? 0 : 1]} ${T('wins')}`;
 
   return (
-    <div className="mx-auto max-w-xl space-y-4">
-      {/* Top Header */}
-      <div className="flex items-center justify-between border-b border-amber-200/80 pb-2">
+    <div className="mx-auto max-w-md space-y-3.5">
+      {/* Clean Header */}
+      <div className="flex items-center justify-between border-b border-stone-200 pb-2.5">
         <button
           onClick={onExit}
-          className="flex items-center gap-1 rounded-xl border border-stone-300 bg-white/80 px-3 py-1.5 text-sm font-medium text-stone-700 shadow-sm transition hover:bg-stone-100 active:scale-95"
+          className="rounded-lg border border-stone-200 bg-white px-3 py-1.5 text-xs font-semibold text-stone-700 transition hover:bg-stone-50 active:scale-95"
         >
-          <span>←</span>
-          <span>{T('back')}</span>
+          ← {T('back')}
         </button>
 
         <div className="text-center">
-          <h2 className="text-lg font-bold text-emerald-950 sm:text-xl">
-            {T('dots')}
-          </h2>
-          <span className="text-xs font-semibold text-emerald-800">
-            {gameState.R}x{gameState.C} Grid • {mode === 'computer' ? `${T('computer')} (${T(difficulty)})` : mode === 'solo' ? T('solo') : T('local')}
+          <h2 className="text-base font-bold text-stone-900">{T('dots')}</h2>
+          <span className="text-[11px] text-stone-500 font-medium">
+            {gameState.R}x{gameState.C} • {mode === 'computer' ? `${T('computer')} (${T(difficulty)})` : mode === 'solo' ? T('solo') : T('local')}
           </span>
         </div>
 
         <button
           onClick={restartGame}
-          className="rounded-xl border border-stone-300 bg-white/80 px-3 py-1.5 text-sm font-medium text-stone-700 shadow-sm transition hover:bg-stone-100 active:scale-95"
-          title={T('rematch')}
+          className="rounded-lg border border-stone-200 bg-white px-3 py-1.5 text-xs font-semibold text-stone-700 transition hover:bg-stone-50 active:scale-95"
         >
-          🔄 {T('rematch')}
+          {T('rematch')}
         </button>
       </div>
 
-      {/* Players Scoreboard & Turn Indicator */}
-      <div className="grid grid-cols-2 gap-3">
-        {/* Player 1 (Blue Pen) */}
+      {/* Turn Banner */}
+      {!gameState.done && (
         <div
-          className={`rounded-2xl border p-3 transition-all ${
-            gameState.turn === 0 && !gameState.done
-              ? 'border-blue-600 bg-blue-50/80 shadow-md ring-2 ring-blue-500/50'
-              : 'border-stone-200 bg-white/80'
+          className={`flex items-center justify-between rounded-xl px-3.5 py-2 text-xs transition ${
+            gameState.turn === 0
+              ? 'bg-blue-600 text-white font-semibold'
+              : 'bg-stone-900 text-white font-semibold'
           }`}
         >
-          <div className="flex items-center justify-between text-xs font-semibold text-stone-600">
-            <span className="flex items-center gap-1.5">
-              <span className="h-3 w-3 rounded-full bg-blue-600 shadow-sm" />
-              <span>{names[0]} (Blue Pen)</span>
-            </span>
-            {gameState.turn === 0 && !gameState.done && (
-              <span className="rounded-full bg-blue-600 px-2 py-0.5 text-[10px] font-bold text-white">
-                {T('turn')}
-              </span>
-            )}
-          </div>
-          <div className="mt-1 text-3xl font-black text-blue-900">{gameState.scores[0]}</div>
-          <div className="text-xs text-stone-500">Boxes Claimed</div>
-        </div>
-
-        {/* Player 2 / Computer (Red Pen) */}
-        <div
-          className={`rounded-2xl border p-3 transition-all ${
-            gameState.turn === 1 && !gameState.done
-              ? 'border-rose-600 bg-rose-50/80 shadow-md ring-2 ring-rose-500/50'
-              : 'border-stone-200 bg-white/80'
-          }`}
-        >
-          <div className="flex items-center justify-between text-xs font-semibold text-stone-600">
-            <span className="flex items-center gap-1.5">
-              <span className="h-3 w-3 rounded-full bg-rose-600 shadow-sm" />
-              <span>{names[1]} (Red Pen)</span>
-            </span>
-            {gameState.turn === 1 && !gameState.done && (
-              <span className="rounded-full bg-rose-600 px-2 py-0.5 text-[10px] font-bold text-white">
-                {T('turn')}
-              </span>
-            )}
-          </div>
-          <div className="mt-1 text-3xl font-black text-rose-900">{gameState.scores[1]}</div>
-          <div className="text-xs text-stone-500">Boxes Claimed</div>
-        </div>
-      </div>
-
-      {/* Bonus turn notification banner */}
-      <div className="h-7 text-center">
-        {bonusTurnAlert && (
-          <span className="inline-block rounded-full bg-amber-400 px-4 py-1 text-xs font-black text-amber-950 shadow-sm animate-bounce">
-            ✨ {T('extraTurn')}
+          <span>
+            {gameState.turn === 0
+              ? lang === 'bn'
+                ? 'আপনার চাল (নীল দাগ)'
+                : 'Your turn (Blue pen)'
+              : isCpuTurn
+              ? lang === 'bn'
+                ? 'কম্পিউটার ভাবছে...'
+                : 'Computer is playing...'
+              : lang === 'bn'
+              ? 'খেলোয়াড় ২ এর চাল'
+              : "Player 2's turn"}
           </span>
-        )}
+          <span className="text-[11px] opacity-90">{names[gameState.turn]}</span>
+        </div>
+      )}
+
+      {/* Clean Scorecard */}
+      <div className="grid grid-cols-2 gap-2.5">
+        <div
+          className={`rounded-xl border p-2.5 transition ${
+            gameState.turn === 0 && !gameState.done
+              ? 'border-blue-600 bg-blue-50/40'
+              : 'border-stone-200 bg-white'
+          }`}
+        >
+          <div className="flex items-center justify-between text-xs font-semibold text-stone-700">
+            <span className="flex items-center gap-1.5">
+              <span className="h-2.5 w-2.5 rounded-full bg-blue-600" />
+              <span>{names[0]}</span>
+            </span>
+            <span className="text-[10px] text-stone-400">P1</span>
+          </div>
+          <div className="mt-1 text-2xl font-bold text-stone-900">{gameState.scores[0]}</div>
+          <div className="text-[10px] text-stone-500">দখলকৃত ঘর</div>
+        </div>
+
+        <div
+          className={`rounded-xl border p-2.5 transition ${
+            gameState.turn === 1 && !gameState.done
+              ? 'border-stone-900 bg-stone-100'
+              : 'border-stone-200 bg-white'
+          }`}
+        >
+          <div className="flex items-center justify-between text-xs font-semibold text-stone-700">
+            <span className="flex items-center gap-1.5">
+              <span className="h-2.5 w-2.5 rounded-full bg-rose-600" />
+              <span>{names[1]}</span>
+            </span>
+            <span className="text-[10px] text-stone-400">P2</span>
+          </div>
+          <div className="mt-1 text-2xl font-bold text-stone-900">{gameState.scores[1]}</div>
+          <div className="text-[10px] text-stone-500">দখলকৃত ঘর</div>
+        </div>
       </div>
 
-      {/* GAME BOARD CANVAS (Ruled Paper + Interactive SVG Grid) */}
-      <div className="relative overflow-hidden rounded-3xl border-2 border-stone-300 bg-[#fffdf8] p-4 shadow-lg sm:p-6">
-        {/* Ruled blue paper background texture */}
-        <div
-          className="pointer-events-none absolute inset-0 opacity-[0.08]"
-          style={{
-            backgroundImage: 'repeating-linear-gradient(0deg, #2563eb, #2563eb 1px, transparent 1px, transparent 24px)',
-          }}
-        />
+      {/* Bonus turn indicator */}
+      {bonusTurnAlert && (
+        <div className="text-center text-xs font-bold text-emerald-700 py-0.5 animate-fade-in">
+          {lang === 'bn' ? 'ঘর পূরণ হয়েছে! বোনাস চাল!' : 'Box claimed! Bonus turn!'}
+        </div>
+      )}
 
+      {/* Clean Board Canvas */}
+      <div className="rounded-2xl border border-stone-200 bg-white p-4 shadow-xs">
         <div className="flex justify-center">
           <svg
             viewBox={`0 0 ${svgWidth} ${svgHeight}`}
-            className="w-full max-w-[380px] filter drop-shadow-sm"
+            className="w-full max-w-[340px] select-none"
           >
-            {/* 1. Claimed Boxes Fills & Stamped Initials */}
+            {/* 1. Claimed Boxes */}
             {gameState.owner.map((ownerIdx, boxIdx) => {
               if (ownerIdx === null) return null;
               const r = Math.floor(boxIdx / gameState.C);
@@ -241,27 +238,24 @@ export default function Dots({lang, mode, difficulty, houseRules, onExit, onDone
 
               return (
                 <g key={boxIdx} className="animate-fade-in">
-                  {/* Textured Ink Fill */}
                   <rect
                     x={x}
                     y={y}
                     width={size}
                     height={size}
                     rx={6}
-                    fill={ownerIdx === 0 ? '#dbeafe' : '#ffe4e6'}
-                    stroke={ownerIdx === 0 ? '#93c5fd' : '#fca5a5'}
-                    strokeWidth={1.5}
+                    fill={ownerIdx === 0 ? '#eff6ff' : '#f5f5f4'}
+                    stroke={ownerIdx === 0 ? '#bfdbfe' : '#e7e5e4'}
+                    strokeWidth={1}
                   />
-                  {/* Stamped Player Symbol */}
                   <text
                     x={x + size / 2}
-                    y={y + size / 2 + 7}
+                    y={y + size / 2 + 6}
                     textAnchor="middle"
-                    fontSize={22}
-                    fontWeight="900"
+                    fontSize={18}
+                    fontWeight="bold"
                     fontFamily="sans-serif"
-                    fill={ownerIdx === 0 ? '#1e40af' : '#be123c'}
-                    opacity={0.9}
+                    fill={ownerIdx === 0 ? '#2563eb' : '#44403c'}
                   >
                     {ownerIdx === 0 ? 'A' : 'B'}
                   </text>
@@ -269,7 +263,7 @@ export default function Dots({lang, mode, difficulty, houseRules, onExit, onDone
               );
             })}
 
-            {/* 2. Grid Lines (Horizontal & Vertical) */}
+            {/* 2. Grid Lines */}
             {gameState.lines.map((isDrawn, lineIdx) => {
               const [x1, y1, x2, y2] = getLineCoords(lineIdx);
               const isHovered = hoverLine === lineIdx && !isDrawn;
@@ -277,32 +271,28 @@ export default function Dots({lang, mode, difficulty, houseRules, onExit, onDone
 
               const strokeColor = isDrawn
                 ? lineOwner === 0
-                  ? '#2563eb' // Player 1 Blue Pen
-                  : lineOwner === 1
-                  ? '#e11d48' // Player 2 / CPU Red Pen
-                  : '#0f172a'
+                  ? '#2563eb'
+                  : '#dc2626'
                 : isHovered
                 ? gameState.turn === 0
                   ? '#93c5fd'
                   : '#fca5a5'
-                : '#e2e8f0';
+                : '#e7e5e4';
 
               return (
                 <g key={lineIdx}>
-                  {/* Drawn or Hover Line */}
                   <line
                     x1={x1}
                     y1={y1}
                     x2={x2}
                     y2={y2}
                     stroke={strokeColor}
-                    strokeWidth={isDrawn ? 4.5 : isHovered ? 3.5 : 2}
+                    strokeWidth={isDrawn ? 4 : isHovered ? 3 : 2}
                     strokeLinecap="round"
                     strokeDasharray={isHovered ? '4,4' : undefined}
-                    className="transition-colors duration-150"
+                    className="transition-colors"
                   />
 
-                  {/* Wide invisible click target for easy mobile tapping */}
                   {!isDrawn && !isCpuTurn && !gameState.done && (
                     <line
                       x1={x1}
@@ -333,34 +323,35 @@ export default function Dots({lang, mode, difficulty, houseRules, onExit, onDone
                   key={k}
                   cx={cx}
                   cy={cy}
-                  r={5}
-                  fill="#1e293b"
+                  r={4.5}
+                  fill="#1c1917"
                   stroke="#ffffff"
-                  strokeWidth={1.5}
-                  className="filter drop-shadow-sm"
+                  strokeWidth={1}
                 />
               );
             })}
           </svg>
         </div>
 
-        {/* Turn Status / Game Over */}
-        <div className="mt-4 text-center">
+        {/* Status / Game Over */}
+        <div className="mt-3 text-center">
           {gameState.done ? (
             <div className="space-y-2">
-              <div className="text-xl font-black text-emerald-800">{winnerText}</div>
+              <div className="text-sm font-bold text-stone-900">{winnerText}</div>
               <button
                 onClick={restartGame}
-                className="rounded-2xl bg-emerald-700 px-6 py-2.5 font-bold text-white shadow hover:bg-emerald-800 active:scale-95"
+                className="w-full max-w-xs rounded-xl bg-stone-900 py-2.5 text-xs font-bold text-white transition hover:bg-stone-800 active:scale-95"
               >
-                🔄 {T('rematch')}
+                {T('rematch')}
               </button>
             </div>
           ) : (
-            <span className="text-xs font-semibold text-stone-500">
+            <span className="text-[11px] text-stone-400">
               {isCpuTurn
                 ? T('computerThinking')
-                : `${names[gameState.turn]}: Tap any dotted line to connect!`}
+                : lang === 'bn'
+                ? 'ডটের মাঝে চাপ দিয়ে দাগ টানুন'
+                : 'Tap between dots to draw lines'}
             </span>
           )}
         </div>

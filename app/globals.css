@@ -1,0 +1,5 @@
+@tailwind base;@tailwind components;@tailwind utilities;
+body{font-family:system-ui,'Noto Sans Bengali','Kalpurush',sans-serif;background:#fdf6e3;color:#1f2937}
+.btn{@apply rounded-xl bg-emerald-700 px-4 py-2 font-semibold text-white active:scale-95 disabled:opacity-40}
+.btn2{@apply rounded-xl border-2 border-emerald-700 px-3 py-1 text-emerald-800}
+.card{@apply rounded-2xl bg-white p-4 shadow}

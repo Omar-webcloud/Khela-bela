@@ -148,38 +148,63 @@ export default function Dots({lang, mode, difficulty, houseRules, onExit, onDone
         </button>
       </div>
 
-      {/* Turn Banner */}
-      {!gameState.done && (
-        <div
-          className={`flex items-center justify-between rounded-xl px-3.5 py-2 text-xs transition ${
-            gameState.turn === 0
-              ? 'bg-blue-600 text-white font-semibold'
-              : 'bg-stone-900 text-white font-semibold'
-          }`}
-        >
-          <span>
-            {gameState.turn === 0
-              ? lang === 'bn'
-                ? 'আপনার চাল (নীল দাগ)'
-                : 'Your turn (Blue pen)'
-              : isCpuTurn
-              ? lang === 'bn'
-                ? 'কম্পিউটার ভাবছে...'
-                : 'Computer is playing...'
-              : lang === 'bn'
-              ? 'খেলোয়াড় ২ এর চাল'
-              : "Player 2's turn"}
-          </span>
-          <span className="text-[11px] opacity-90">{names[gameState.turn]}</span>
+      {/* Unified Turn & Status Banner - Fixed Height to prevent layout shifts */}
+      <div
+        className={`flex h-11 items-center justify-between rounded-xl px-3.5 text-xs font-semibold shadow-xs transition-colors duration-200 ${
+          gameState.done
+            ? 'bg-amber-600 text-white'
+            : bonusTurnAlert
+            ? 'bg-emerald-600 text-white'
+            : gameState.turn === 0
+            ? 'bg-blue-600 text-white'
+            : 'bg-stone-900 text-white'
+        }`}
+      >
+        <div className="flex items-center gap-2 truncate">
+          {gameState.done ? (
+            <span className="truncate">🏆 {winnerText}</span>
+          ) : bonusTurnAlert ? (
+            <span className="flex items-center gap-1.5 animate-pulse truncate font-bold">
+              <span>🎉</span>
+              <span>{lang === 'bn' ? 'ঘর পূরণ হয়েছে! বোনাস চাল!' : 'Box claimed! Bonus turn!'}</span>
+            </span>
+          ) : (
+            <span className="flex items-center gap-1.5 truncate">
+              <span
+                className={`h-2.5 w-2.5 rounded-full ring-2 ring-white/50 ${
+                  gameState.turn === 0 ? 'bg-blue-300' : 'bg-rose-400'
+                }`}
+              />
+              <span className="truncate">
+                {gameState.turn === 0
+                  ? lang === 'bn'
+                    ? 'আপনার চাল (নীল দাগ)'
+                    : 'Your turn (Blue pen)'
+                  : isCpuTurn
+                  ? lang === 'bn'
+                    ? 'কম্পিউটার ভাবছে...'
+                    : 'Computer is playing...'
+                  : lang === 'bn'
+                  ? 'খেলোয়াড় ২ এর চাল'
+                  : "Player 2's turn"}
+              </span>
+            </span>
+          )}
         </div>
-      )}
+
+        <span className="shrink-0 rounded-md bg-white/20 px-2 py-0.5 text-[11px] font-medium backdrop-blur-xs">
+          {gameState.done
+            ? names[gameState.scores[0] > gameState.scores[1] ? 0 : 1]
+            : names[gameState.turn]}
+        </span>
+      </div>
 
       {/* Clean Scorecard */}
       <div className="grid grid-cols-2 gap-2.5">
         <div
           className={`rounded-xl border p-2.5 transition ${
             gameState.turn === 0 && !gameState.done
-              ? 'border-blue-600 bg-blue-50/40'
+              ? 'border-blue-600 bg-blue-50/40 ring-1 ring-blue-500/20'
               : 'border-stone-200 bg-white'
           }`}
         >
@@ -197,7 +222,7 @@ export default function Dots({lang, mode, difficulty, houseRules, onExit, onDone
         <div
           className={`rounded-xl border p-2.5 transition ${
             gameState.turn === 1 && !gameState.done
-              ? 'border-stone-900 bg-stone-100'
+              ? 'border-stone-900 bg-stone-100 ring-1 ring-stone-900/10'
               : 'border-stone-200 bg-white'
           }`}
         >
@@ -212,13 +237,6 @@ export default function Dots({lang, mode, difficulty, houseRules, onExit, onDone
           <div className="text-[10px] text-stone-500">দখলকৃত ঘর</div>
         </div>
       </div>
-
-      {/* Bonus turn indicator */}
-      {bonusTurnAlert && (
-        <div className="text-center text-xs font-bold text-emerald-700 py-0.5 animate-fade-in">
-          {lang === 'bn' ? 'ঘর পূরণ হয়েছে! বোনাস চাল!' : 'Box claimed! Bonus turn!'}
-        </div>
-      )}
 
       {/* Clean Board Canvas */}
       <div className="rounded-2xl border border-stone-200 bg-white p-4 shadow-xs">
@@ -333,20 +351,17 @@ export default function Dots({lang, mode, difficulty, houseRules, onExit, onDone
           </svg>
         </div>
 
-        {/* Status / Game Over */}
-        <div className="mt-3 text-center">
+        {/* Bottom Action & Hint Bar - Fixed Height to prevent jumping */}
+        <div className="mt-3 flex h-10 items-center justify-center text-center">
           {gameState.done ? (
-            <div className="space-y-2">
-              <div className="text-sm font-bold text-stone-900">{winnerText}</div>
-              <button
-                onClick={restartGame}
-                className="w-full max-w-xs rounded-xl bg-stone-900 py-2.5 text-xs font-bold text-white transition hover:bg-stone-800 active:scale-95"
-              >
-                {T('rematch')}
-              </button>
-            </div>
+            <button
+              onClick={restartGame}
+              className="w-full max-w-xs rounded-xl bg-stone-900 py-2.5 text-xs font-bold text-white transition hover:bg-stone-800 active:scale-95 shadow-xs"
+            >
+              {T('rematch')}
+            </button>
           ) : (
-            <span className="text-[11px] text-stone-400">
+            <span className="text-[11px] font-medium text-stone-500">
               {isCpuTurn
                 ? T('computerThinking')
                 : lang === 'bn'

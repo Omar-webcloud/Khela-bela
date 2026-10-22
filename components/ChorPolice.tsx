@@ -264,14 +264,20 @@ export default function ChorPolice({mode, difficulty, houseRules, onExit, onDone
             </div>
           </div>
 
-          {chitUnfolded && (
-            <button
-              onClick={handleConfirmChit}
-              className="w-full max-w-xs rounded-xl bg-stone-900 py-2.5 text-xs font-bold text-white transition hover:bg-stone-800 active:scale-95"
-            >
-              লুকিয়ে এগিয়ে যান
-            </button>
-          )}
+          <div className="flex h-11 items-center justify-center">
+            {chitUnfolded ? (
+              <button
+                onClick={handleConfirmChit}
+                className="w-full max-w-xs rounded-xl bg-stone-900 py-2.5 text-xs font-bold text-white transition hover:bg-stone-800 active:scale-95 shadow-xs animate-fade-in"
+              >
+                লুকিয়ে এগিয়ে যান
+              </button>
+            ) : (
+              <span className="text-xs font-medium text-stone-400">
+                চিরকুটে চাপ দিয়ে ভূমিকা দেখুন
+              </span>
+            )}
+          </div>
         </div>
       )}
 
@@ -339,12 +345,12 @@ export default function ChorPolice({mode, difficulty, houseRules, onExit, onDone
           </p>
 
           {isHumanPolice ? (
-            <div className="flex flex-wrap justify-center gap-2.5">
+            <div className="flex flex-wrap justify-center gap-2.5 min-h-[92px] items-center">
               {candidates(roles).map(idx => (
                 <button
                   key={idx}
                   onClick={() => handleAccusation(idx)}
-                  className="flex flex-col items-center gap-1 rounded-xl border border-stone-200 bg-stone-50 p-3 text-center transition hover:border-stone-400 hover:bg-white active:scale-95 min-w-[100px]"
+                  className="flex flex-col items-center gap-1 rounded-xl border border-stone-200 bg-stone-50 p-3 text-center transition hover:border-stone-400 hover:bg-white active:scale-95 min-w-[100px] shadow-xs"
                 >
                   <span className="text-xl">❓</span>
                   <span className="text-xs font-bold text-stone-900">{names[idx]}</span>
@@ -353,8 +359,11 @@ export default function ChorPolice({mode, difficulty, houseRules, onExit, onDone
               ))}
             </div>
           ) : (
-            <div className="py-4 text-xs text-stone-500">
-              কম্পিউটার পুলিশ সিদ্ধান্ত নিচ্ছে...
+            <div className="flex min-h-[92px] items-center justify-center text-xs text-stone-500">
+              <span className="flex items-center gap-2">
+                <span className="h-2 w-2 rounded-full bg-emerald-600 animate-ping" />
+                <span>কম্পিউটার পুলিশ সিদ্ধান্ত নিচ্ছে...</span>
+              </span>
             </div>
           )}
         </div>

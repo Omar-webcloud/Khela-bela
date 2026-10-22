@@ -183,29 +183,45 @@ export default function Cricket({lang, mode, difficulty, houseRules, onExit, onD
         </button>
       </div>
 
-      {/* Turn Banner */}
-      {!match.done && (
-        <div
-          className={`flex items-center justify-between rounded-xl px-3.5 py-2 text-xs transition ${
-            isMyTurn
-              ? 'bg-emerald-700 text-white font-semibold'
-              : 'bg-stone-100 text-stone-600 font-medium'
-          }`}
-        >
-          <span>
-            {isMyTurn
-              ? lang === 'bn'
-                ? 'আপনার পালা: কলম ঘোরান'
-                : 'Your turn: Spin the pen'
-              : lang === 'bn'
-              ? 'কম্পিউটার ভাবছে...'
-              : 'Computer is playing...'}
-          </span>
-          <span className="text-[11px] opacity-90">
-            {names[currentBatsman]} {lang === 'bn' ? 'ব্যাটিং' : 'Batting'}
-          </span>
+      {/* Unified Turn & Status Banner - Fixed Height to prevent layout shifts */}
+      <div
+        className={`flex h-11 items-center justify-between rounded-xl px-3.5 text-xs font-semibold shadow-xs transition-colors duration-200 ${
+          match.done
+            ? 'bg-emerald-800 text-white'
+            : isMyTurn
+            ? 'bg-emerald-700 text-white'
+            : 'bg-stone-900 text-white'
+        }`}
+      >
+        <div className="flex items-center gap-2 truncate">
+          {match.done ? (
+            <span className="truncate">🏆 {winText}</span>
+          ) : (
+            <span className="flex items-center gap-1.5 truncate">
+              <span
+                className={`h-2.5 w-2.5 rounded-full ring-2 ring-white/50 ${
+                  isMyTurn ? 'bg-emerald-300' : 'bg-amber-400'
+                }`}
+              />
+              <span className="truncate">
+                {isMyTurn
+                  ? lang === 'bn'
+                    ? 'আপনার পালা: কলম ঘোরান'
+                    : 'Your turn: Spin the pen'
+                  : lang === 'bn'
+                  ? 'কম্পিউটার ভাবছে...'
+                  : 'Computer is playing...'}
+              </span>
+            </span>
+          )}
         </div>
-      )}
+
+        <span className="shrink-0 rounded-md bg-white/20 px-2 py-0.5 text-[11px] font-medium backdrop-blur-xs">
+          {match.done
+            ? 'Match Finished'
+            : `${names[currentBatsman]} ${lang === 'bn' ? 'ব্যাটিং' : 'Batting'}`}
+        </span>
+      </div>
 
       {/* Clean Scorecard */}
       <div className="rounded-xl border border-stone-200 bg-white p-3.5 space-y-2.5 shadow-xs">
@@ -219,7 +235,7 @@ export default function Cricket({lang, mode, difficulty, houseRules, onExit, onD
                 key={idx}
                 className={`rounded-lg p-2.5 transition border ${
                   isBatting
-                    ? 'border-emerald-600 bg-emerald-50/50'
+                    ? 'border-emerald-600 bg-emerald-50/50 ring-1 ring-emerald-500/20'
                     : 'border-stone-100 bg-stone-50/70'
                 }`}
               >
@@ -247,18 +263,18 @@ export default function Cricket({lang, mode, difficulty, houseRules, onExit, onD
           })}
         </div>
 
-        {/* Target summary */}
-        <div className="text-center text-xs text-stone-600 font-medium pt-1 border-t border-stone-100">
+        {/* Target summary - Fixed height container */}
+        <div className="text-center text-xs text-stone-600 font-medium pt-1 border-t border-stone-100 min-h-[28px] flex items-center justify-center">
           {match.innings === 2 && !match.done ? (
-            <span>
+            <span className="truncate">
               {T('target')}: <b>{targetRuns}</b> • {T('needs')}{' '}
               <b>{Math.max(0, runsRemaining)}</b> {T('from')}{' '}
               <b>{Math.max(0, ballsRemaining)}</b> {T('balls')}
             </span>
           ) : match.done ? (
-            <span className="font-bold text-emerald-800">{winText}</span>
+            <span className="font-bold text-emerald-800 truncate">{winText}</span>
           ) : (
-            <span>
+            <span className="truncate">
               {T('firstInnings')}: {maxBalls} {T('balls')} • {maxWickets} {T('wk')}
             </span>
           )}
@@ -407,19 +423,31 @@ export default function Cricket({lang, mode, difficulty, houseRules, onExit, onD
           </svg>
         </div>
 
-        {/* Dynamic commentary */}
-        <div className="mt-2 text-center min-h-[32px] flex items-center justify-center">
-          {commentary ? (
-            <span className="text-xs font-bold text-stone-800">{commentary}</span>
-          ) : (
-            <span className="text-[11px] text-stone-400">
-              {isMyTurn
-                ? lang === 'bn'
-                  ? 'কলমে চাপ দিয়ে ঘোরান'
-                  : 'Tap the pen to spin'
-                : T('computerThinking')}
-            </span>
-          )}
+        {/* Commentary & Instruction Capsule - Fixed Height to prevent layout shifts */}
+        <div className="mt-2.5 flex items-center justify-center">
+          <div className="flex h-9 w-full max-w-xs items-center justify-center rounded-xl border border-stone-200 bg-stone-50/80 px-3 text-center transition-all">
+            {commentary ? (
+              <span
+                className={`text-xs font-bold truncate animate-fade-in ${
+                  lastOutcome === 6 || lastOutcome === 4
+                    ? 'text-emerald-700'
+                    : lastOutcome === 'W'
+                    ? 'text-rose-600'
+                    : 'text-stone-800'
+                }`}
+              >
+                {commentary}
+              </span>
+            ) : (
+              <span className="text-[11px] font-medium text-stone-500 truncate">
+                {isMyTurn
+                  ? lang === 'bn'
+                    ? 'কলমে চাপ দিয়ে ঘোরান'
+                    : 'Tap the pen or button to spin'
+                  : T('computerThinking')}
+              </span>
+            )}
+          </div>
         </div>
 
         {/* Action Button */}
@@ -428,7 +456,7 @@ export default function Cricket({lang, mode, difficulty, houseRules, onExit, onD
             <button
               onClick={handleSpin}
               disabled={spinning || isCpuTurn}
-              className={`w-full max-w-xs rounded-xl py-2.5 text-xs font-bold transition active:scale-95 disabled:opacity-40 ${
+              className={`w-full max-w-xs rounded-xl py-2.5 text-xs font-bold transition active:scale-95 disabled:opacity-40 shadow-xs ${
                 isMyTurn
                   ? 'bg-emerald-700 text-white hover:bg-emerald-800'
                   : 'bg-stone-200 text-stone-500 cursor-not-allowed'
@@ -443,7 +471,7 @@ export default function Cricket({lang, mode, difficulty, houseRules, onExit, onD
           ) : (
             <button
               onClick={restartMatch}
-              className="w-full max-w-xs rounded-xl bg-stone-900 py-2.5 text-xs font-bold text-white transition hover:bg-stone-800 active:scale-95"
+              className="w-full max-w-xs rounded-xl bg-stone-900 py-2.5 text-xs font-bold text-white transition hover:bg-stone-800 active:scale-95 shadow-xs"
             >
               {T('rematch')}
             </button>
@@ -451,22 +479,22 @@ export default function Cricket({lang, mode, difficulty, houseRules, onExit, onD
         </div>
       </div>
 
-      {/* Deliveries log */}
+      {/* Deliveries log - Fixed height with smooth horizontal scrolling */}
       <div className="rounded-xl border border-stone-200 bg-white p-3 space-y-1.5 shadow-xs">
         <div className="flex items-center justify-between text-[11px] font-semibold text-stone-500">
           <span>{lang === 'bn' ? 'বলের হিসেব' : 'Ball Log'}</span>
           <span>{match.log.length} {T('balls')}</span>
         </div>
-        <div className="flex flex-wrap gap-1">
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 min-h-[32px] scrollbar-none">
           {match.log.length === 0 ? (
-            <span className="text-xs text-stone-400 py-1">
+            <span className="text-xs text-stone-400">
               {lang === 'bn' ? 'এখনও কোনো বল করা হয়নি' : 'No balls bowled yet'}
             </span>
           ) : (
             match.log.map((outcome, idx) => (
               <span
                 key={idx}
-                className={`flex h-6 w-6 items-center justify-center rounded text-xs font-mono font-semibold border ${
+                className={`flex h-6 w-6 shrink-0 items-center justify-center rounded text-xs font-mono font-semibold border ${
                   outcome === 6
                     ? 'bg-stone-900 text-white border-stone-900'
                     : outcome === 4
